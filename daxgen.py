@@ -9,9 +9,9 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 class CASAWorkflow(object):
-    def __init__(self, outdir, radar_files):
+    def __init__(self, outdir, forecast_file):
         self.outdir = outdir
-        self.radar_files = radar_files
+        self.forecast_file = forecast_file
 
     def generate_dax(self):
         "Generate a workflow"
@@ -23,50 +23,50 @@ class CASAWorkflow(object):
         #dax.metadata("created", time.ctime())
 
         # unzip files if needed
-        radar_inputs = []
+        ##nowcast_inputs = []
         #last_time = "0"
-        for f in self.radar_files:
-            f = f.split("/")[-1]
-            if f.endswith(".gz"):
-                radar_input = f[:-3]
-                radar_inputs.append(radar_input)
+        ##for f in self.radar_files:
+          ##  f = f.split("/")[-1]
+           ## if f.endswith(".gz"):
+             ##   nowcast_input = f[:-3]
+               ## radar_inputs.append(nowcast_input)
 
-                unzip = Job("gunzip")
-                unzip.addArguments(f)
-                unzip.uses(f, link=Link.INPUT)
-                unzip.uses(radar_input, link=Link.OUTPUT, transfer=False, register=False)
-                dax.addJob(unzip)
-            else:
-                radar_inputs.append(f)
+               ## unzip = Job("gunzip")
+               ## unzip.addArguments(f)
+               ## unzip.uses(f, link=Link.INPUT)
+               ## unzip.uses(nowcast_input, link=Link.OUTPUT, transfer=False, register=False)
+               ## dax.addJob(unzip)
+            ##else:
+        ##nowcast_inputs.append(self.forecast)
             #string_start = f.find("-")
             #string_end = f.find(".", string_start)
             #file_time = f[string_start+1:string_end]
             #if file_time > last_time:
             #    last_time = file_time
         
-        string_start = self.radar_files[-1].find("-")
-        string_end = self.radar_files[-1].find(".", string_start)
-        last_time = self.radar_files[-1][string_start+1:string_end]
+        string_start = self.forecast_file[-1].find("-")
+        string_end = self.forecast_file[-1].find(".", string_start)
+        last_time = self.forecast_file[-1][string_start+1:string_end]
 
         #run merged reflectivity threshold
         mrtconfigfile = File("mrt_config.txt")
-        #max_reflectivity = File("MergedReflectivity_"+last_time+".netcdf")
+        my_forecast_file = File(self.forecast_file[-1])
         mrt_job = Job("mrtV2")
         mrt_job.addArguments("-c", mrtconfigfile)
-        mrt_job.addArguments(" ".join(nowcast_inputs))
+        mrt_job.addArguments(" ".join(self.forecast_file[-1]))
         mrt_job.uses(mrtconfigfile, link=Link.INPUT)
-        mrt_job.uses(nowcast_inputs, link=Link.INPUT)
+        mrt_job.uses(self.forecast_file[-1], link=Link.INPUT)
         #ref_job.uses(max_reflectivity, link=Link.OUTPUT, transfer=True, register=False)
         dax.addJob(mrt_job)
 
         # generate image from max reflectivity
         colorscale = File("nexrad_ref.png")
-        max_reflectivity_image = File(max_reflectivity.name[:-7]+".png")
         post_ref_job = Job("merged_netcdf2png")
-        post_ref_job.addArguments("-c", colorscale, "-q 235 -z 0,75", "-o", max_reflectivity_image, max_reflectivity)
-        post_ref_job.uses(max_reflectivity, link=Link.INPUT)
+        forecast_image = File(my_forecast_file.name[:-4]+".png")
+        post_ref_job.addArguments("-c", colorscale, "-q 235 -z 0,75", "-o", forecast_image, my_forecast_file)
+        post_ref_job.uses(my_forecast_file, link=Link.INPUT)
         post_ref_job.uses(colorscale, link=Link.INPUT)
-        post_ref_job.uses(max_reflectivity_image, link=Link.OUTPUT, transfer=True, register=False)
+        post_ref_job.uses(forecast_image, link=Link.OUTPUT, transfer=True, register=False)
         dax.addJob(post_ref_job)
 
         # Write the DAX file
@@ -80,7 +80,7 @@ class CASAWorkflow(object):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="CASA Workflow")
-    parser.add_argument("-f", "--files", metavar="INPUT_FILES", type=str, nargs="+", help="Radar Files", required=True)
+    parser.add_argument("-f", "--files", metavar="INPUT_FILE", type=str, nargs="+", help="Forecast File", required=True)
     parser.add_argument("-o", "--outdir", metavar="OUTPUT_LOCATION", type=str, help="DAX Directory", required=True)
 
     args = parser.parse_args()
