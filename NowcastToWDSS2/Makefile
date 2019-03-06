@@ -4,8 +4,8 @@
 SOURCES.c= run_convert.c NowcastToWDSS2.c
 $(CC)=gcc 
 # insert here -lnetcdf
-CFLAGS=-Wall -g -I/usr/local/netcdf/include
-LDFLAGS=-lm -L/usr/local/netcdf/lib -lnetcdf
+CFLAGS=-Wall -g -I/usr/local/netcdf/include -I/usr/include
+LDFLAGS=-lm -L/usr/lib/x86_64-linux-gnu/ -lnetcdf
 
 PROGRAM=NowcastToWDSS2 
 
@@ -18,7 +18,7 @@ debug := CFLAGS= -g -s
 all debug: $(PROGRAM)
 
 $(PROGRAM): $(INCLUDES) $(OBJECTS)
-		$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
+		$(LINK.c) -o $@ $(OBJECTS) $(LDFLAGS)
 
 clean:
 		rm -f $(PROGRAM) $(OBJECTS)
