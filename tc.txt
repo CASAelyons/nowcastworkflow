@@ -4,10 +4,21 @@ cont casa_image {
     image "docker:///casaelyons/nowcastcontainer"
 }
 
+tr NowcastToWDSS2 {
+   	site condorpool {
+	     	container "casa_image"
+		pfn "/opt/NowcastToWDSS2"
+		arch "x86_64"
+		os "LINUX"
+		type "INSTALLED"
+	profile pegasus "label" "casa_job"
+	}
+}
+		
 tr mrtV2 {
 	site condorpool {
 		container "casa_image"
-		pfn "/opt/mrt/mrt"
+		pfn "/opt/mrtV2/mrtV2"
 		arch "x86_64"
 		os "LINUX"
 		type "INSTALLED"

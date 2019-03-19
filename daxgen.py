@@ -18,56 +18,48 @@ class CASAWorkflow(object):
         ts = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
         dax = ADAG("casa_wf-%s" % ts)
         dax.metadata("name", "CASA")
-        #USER = pwd.getpwuid(os.getuid())[0]
-        #dax.metadata("creator", "%s@%s" % (USER, os.uname()[1]))
-        #dax.metadata("created", time.ctime())
 
-        # unzip files if needed
-        ##nowcast_inputs = []
-        #last_time = "0"
-        ##for f in self.radar_files:
-          ##  f = f.split("/")[-1]
-           ## if f.endswith(".gz"):
-             ##   nowcast_input = f[:-3]
-               ## radar_inputs.append(nowcast_input)
+        #extract time
+        string_end = self.forecast_file[-1].find(".")
+        file_time = self.forecast_file[-1][string_end-12:string_end]
+        file_time = file_time + "00"
+        file_ymd = file_time[0:8]
+        file_hms = file_time[8:14]
 
-               ## unzip = Job("gunzip")
-               ## unzip.addArguments(f)
-               ## unzip.uses(f, link=Link.INPUT)
-               ## unzip.uses(nowcast_input, link=Link.OUTPUT, transfer=False, register=False)
-               ## dax.addJob(unzip)
-            ##else:
-        ##nowcast_inputs.append(self.forecast)
-            #string_start = f.find("-")
-            #string_end = f.find(".", string_start)
-            #file_time = f[string_start+1:string_end]
-            #if file_time > last_time:
-            #    last_time = file_time
+        #convert to individual minute files
+        nowcast_split_job = Job("NowcastToWDSS2")
+        nowcast_split_job.addArguments(" ".join(self.forecast_file[-1]));
+        nowcast_split_job.addArguments(" .");
+        nowcast_split_job.uses(self.forecast_file[-1], link=Link.INPUT)
+        for x in range(31):
+            pr_file = File("PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc")
+            nowcast_split_job.uses(pr_file, link=Link.OUTPUT, transfer=True, register=False)          
+        dax.addJob(nowcast_split_job)
         
-        string_start = self.forecast_file[-1].find("-")
-        string_end = self.forecast_file[-1].find(".", string_start)
-        last_time = self.forecast_file[-1][string_start+1:string_end]
-
         #run merged reflectivity threshold
         mrtconfigfile = File("mrt_config.txt")
-        my_forecast_file = File(self.forecast_file[-1])
-        mrt_job = Job("mrtV2")
-        mrt_job.addArguments("-c", mrtconfigfile)
-        mrt_job.addArguments(" ".join(self.forecast_file[-1]))
-        mrt_job.uses(mrtconfigfile, link=Link.INPUT)
-        mrt_job.uses(self.forecast_file[-1], link=Link.INPUT)
-        #ref_job.uses(max_reflectivity, link=Link.OUTPUT, transfer=True, register=False)
-        dax.addJob(mrt_job)
-
+        for x in range(31):
+            pr_file = File("PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc")
+            pr_geojson = File("mrt_STORM_CASA_" + str(x) + "_" + file_ymd + "-" + file_hms + ".geojson")
+            mrt_job = Job("mrtV2")
+            mrt_job.addArguments("-c", mrtconfigfile)
+            mrt_job.addArguments(" ".join(pr_file))
+            mrt_job.uses(mrtconfigfile, link=Link.INPUT)
+            mrt_job.uses(pr_file, link=Link.INPUT)
+            mrt_job.uses(pr_geojson, link=Link.OUTPUT, transfer=True, register=False)
+            dax.addJob(mrt_job)
+        
         # generate image from max reflectivity
         colorscale = File("nexrad_ref.png")
-        post_ref_job = Job("merged_netcdf2png")
-        forecast_image = File(my_forecast_file.name[:-4]+".png")
-        post_ref_job.addArguments("-c", colorscale, "-q 235 -z 0,75", "-o", forecast_image, my_forecast_file)
-        post_ref_job.uses(my_forecast_file, link=Link.INPUT)
-        post_ref_job.uses(colorscale, link=Link.INPUT)
-        post_ref_job.uses(forecast_image, link=Link.OUTPUT, transfer=True, register=False)
-        dax.addJob(post_ref_job)
+        for x in range(31):
+            pr_image_job = Job("merged_netcdf2png")
+            pr_file = File("PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc")
+            pr_image = File("PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".png")
+            pr_image_job.addArguments("-c", colorscale, "-q 235 -z 0,75", "-o", pr_image, pr_file)
+            pr_image_job.uses(pr_file, link=Link.INPUT)
+            pr_image_job.uses(colorscale, link=Link.INPUT)
+            pr_image_job.uses(pr_image, link=Link.OUTPUT, transfer=True, register=False)
+            dax.addJob(pr_image_job)
 
         # Write the DAX file
         daxfile = os.path.join(self.outdir, dax.name+".dax")

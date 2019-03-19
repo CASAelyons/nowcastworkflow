@@ -60,29 +60,11 @@ sub file_monitor {
 	    sleep 1;
 	    my $pathstr;
             my $filename;
-	    my $hmstr;
-	    my $ymdstr;
-	    my $workflow_dir = $ENV{'CASA_WORKFLOW_DIR'};
             ($pathstr, $filename) = $file =~ m|^(.*[/\\])([^/\\]+?)$|;
 	    my $filetype = "MERGE_DARTS";
 	    if (index($filename, $filetype) != -1) {
-		$hmstr = substr($filename, -7, 4);
-		$ymdstr = substr($filename, -15, 8);
-		system("NowcastToWDSS2 $file $workflow_dir/input");
-		my $min0 = $workflow_dir . "/input/PredictedReflectivity_0min_" . $ymdstr . "-" . $hmstr . "00.nc";
-		my $min5 = $workflow_dir . "/input/PredictedReflectivity_5min_". $ymdstr . "-". $hmstr . "00.nc";
-		my $min10 = $workflow_dir . "/input/PredictedReflectivity_10min_". $ymdstr . "-". $hmstr . "00.nc";
-		my $min15 = $workflow_dir . "/input/PredictedReflectivity_15min_". $ymdstr . "-". $hmstr . "00.nc";
-		my $min20 = $workflow_dir . "/input/PredictedReflectivity_20min_". $ymdstr . "-". $hmstr . "00.nc";
-		&trigger_pegasus($min0);
-		&trigger_pegasus($min5);
-		&trigger_pegasus($min10);
-		&trigger_pegasus($min15);
-		&trigger_pegasus($min20);
-		#print "pqinsert -f EXP -p nowcast_" . $ymdstr . "-" . $hmstr . "00.netcdf " . $file . "\n";
+		&trigger_pegasus($file);
 	    }
-	    #system("merge_qpe_netcdf2png -c /home/ldm/netcdf2png/colorscales/standard_qpe.png -z 0,95.25 $file -o /data/images/multi/qpe1hr_multi_$ymdstr-$hmsstr.png");
-	    #system("pqinsert -f EXP -p qpe1hr_multi_$ymdstr-$hmsstr.png /data/images/multi/qpe1hr_multi_$ymdstr-$hmsstr.png");
 	}
     }
 }
@@ -119,4 +101,3 @@ sub trigger_pegasus {
     #print($daxcall);
     system($daxcall);
 }
-
