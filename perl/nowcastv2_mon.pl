@@ -61,9 +61,10 @@ sub file_monitor {
             ($pathstr, $filename) = $file =~ m|^(.*[/\\])([^/\\]+?)$|;
 	    my $filetype = "MERGE_DARTS";
 	    if (index($filename, $filetype) != -1) {
-		#my $cploc = $workflow_dir . "/input/" . $filename;
-		#copy($file, $cploc);
-		&trigger_pegasus($file);
+		my $cploc = $workflow_dir . "/input/" . $filename;
+		copy($file, $cploc);
+		&trigger_pegasus($filename);
+		#unlink $file;
 	    }
 	}
     }

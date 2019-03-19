@@ -9,9 +9,9 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 class CASAWorkflow(object):
-    def __init__(self, outdir, forecast_file):
+    def __init__(self, outdir, forecast_fn):
         self.outdir = outdir
-        self.forecast_file = forecast_file
+        self.forecast_fn = forecast_fn
 
     def generate_dax(self):
         "Generate a workflow"
@@ -20,17 +20,18 @@ class CASAWorkflow(object):
         dax.metadata("name", "CASA")
 
         #extract time
-        string_end = self.forecast_file[-1].find(".")
-        file_time = self.forecast_file[-1][string_end-12:string_end]
+        string_end = self.forecast_fn[-1].find(".")
+        file_time = self.forecast_fn[-1][string_end-12:string_end]
         file_time = file_time + "00"
         file_ymd = file_time[0:8]
         file_hms = file_time[8:14]
 
         #convert to individual minute files
         nowcast_split_job = Job("NowcastToWDSS2")
-        nowcast_split_job.addArguments(" ".join(self.forecast_file[-1]));
-        nowcast_split_job.addArguments(" .");
-        nowcast_split_job.uses(self.forecast_file[-1], link=Link.INPUT)
+        nowcast_split_job.addArguments(self.forecast_fn[-1]);
+        nowcast_split_job.addArguments(".");
+        forecast_file = File(self.forecast_fn[-1])
+        nowcast_split_job.uses(forecast_file, link=Link.INPUT)
         for x in range(31):
             pr_file = File("PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc")
             nowcast_split_job.uses(pr_file, link=Link.OUTPUT, transfer=True, register=False)          
@@ -73,7 +74,7 @@ class CASAWorkflow(object):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="CASA Workflow")
-    parser.add_argument("-f", "--files", metavar="INPUT_FILE", type=str, nargs="+", help="Forecast File", required=True)
+    parser.add_argument("-f", "--files", metavar="INPUT_FILE", type=str, nargs="+", help="Forecast Filename", required=True)
     parser.add_argument("-o", "--outdir", metavar="OUTPUT_LOCATION", type=str, help="DAX Directory", required=True)
 
     args = parser.parse_args()
