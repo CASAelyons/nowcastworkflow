@@ -15,18 +15,16 @@
 use POSIX qw(setsid);
 use File::Copy;
 use File::Monitor;
-#use File::chdir;
 use threads;
 use threads::shared;
 
 our $input_data_dir;
+our $workflow_dir = $ENV{'CASA_WORKFLOW_DIR'};
 
-##Parse Command Line
 &command_line_parse;
 
 #&daemonize;
 
-##Realtime Mode -- Gets MCC stream
 my $file_mon = new threads \&file_monitor;
 
 sleep 900000000;
@@ -63,6 +61,8 @@ sub file_monitor {
             ($pathstr, $filename) = $file =~ m|^(.*[/\\])([^/\\]+?)$|;
 	    my $filetype = "MERGE_DARTS";
 	    if (index($filename, $filetype) != -1) {
+		#my $cploc = $workflow_dir . "/input/" . $filename;
+		#copy($file, $cploc);
 		&trigger_pegasus($file);
 	    }
 	}
@@ -96,7 +96,6 @@ sub command_line_parse {
 sub trigger_pegasus {
     my @ifiles = @_;
     my $ifile = $ifiles[0];
-    my $workflow_dir = $ENV{'CASA_WORKFLOW_DIR'};
     my $daxcall = $workflow_dir . "/run_casa_wf.sh " . $ifile;
     #print($daxcall);
     system($daxcall);
