@@ -7,7 +7,7 @@ cont casa_image {
 tr NowcastToWDSS2 {
    	site condorpool {
 	     	container "casa_image"
-		pfn "/opt/NowcastToWDSS2"
+		pfn "/opt/NowcastToWDSS2/NowcastToWDSS2"
 		arch "x86_64"
 		os "LINUX"
 		type "INSTALLED"
