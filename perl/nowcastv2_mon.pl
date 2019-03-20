@@ -64,7 +64,7 @@ sub file_monitor {
 		my $cploc = $workflow_dir . "/input/" . $filename;
 		copy($file, $cploc);
 		&trigger_pegasus($filename);
-		#unlink $file;
+		unlink $file;
 	    }
 	}
     }
