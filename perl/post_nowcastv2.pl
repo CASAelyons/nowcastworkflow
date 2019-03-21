@@ -15,7 +15,7 @@
 use POSIX qw(setsid);
 use File::Copy;
 use File::Monitor;
-use File::chdir;
+
 use threads;
 use threads::shared;
 
@@ -51,12 +51,12 @@ sub file_monitor {
     sub new_files 
     {
 	my ($name, $event, $change) = @_;
-	my %minhash;
-	$minhash{"0min"} = 1;
-	$minhash{"1min"} = 1;
-	$minhash{"5min"} = 1;
-	$minhash{"10min"} = 1;
-	$minhash{"15min"} = 1;
+	#my %minhash;
+	#$minhash{"0min"} = 1;
+	#$minhash{"1min"} = 1;
+	#$minhash{"5min"} = 1;
+	#$minhash{"10min"} = 1;
+	#$minhash{"15min"} = 1;
 
 	@new_netcdf_files = $change->files_created;
 	my @dels = $change->files_deleted;
@@ -68,45 +68,44 @@ sub file_monitor {
             my $suffix = substr($filename, -3, 3);
 	    
 	    if ($suffix eq ".nc") {
-		my @split_arr = split /_/, $file;
-	       	
-		if (exists $minhash{$split_arr[1]}) {
-		    my $hmsstr = substr($filename, -9, 6);
-		    my $ymdstr = substr($filename, -18, 8);
-		    my $pngcall = "merged_netcdf2png -o /data/images/PredictedReflectivity_" .$split_arr[1] . "_" . $ymdstr . "-" . $hmsstr . ".png " . $file;
-		    my $pngcallxml = "merged_netcdf2png -o /data/images/PredictedReflectivity_" . $split_arr[1] . "_" . $ymdstr . "-" . $hmsstr . ".png -x /data/images/nowcastV2_" . $ymdstr . "-" . $hmsstr . ".xml " . $file;
-                    print "$pngcall" . "\n";
-		    if ($split_arr[1] eq "1min") {
-			system($pngcallxml);
-		    }
-		    else {
-			system($pngcall);
-		    }
-		    if ($split_arr[1] ne "0min") {
-			my $scpcall = "scp " . $file . " eadams\@hazard.hpcc.umass.edu:/data/nowcastV2";
-			system($scpcall);
-		    }
-		    sleep 1;
-		    unlink $file;
-		}
-		else { 
-		    unlink $file;
-		}
+		unlink $file;
 	    }
 	    elsif ($suffix eq "png") {
 		my @split_arr = split /_/, $filename;
+		my $minstr = substr($split_arr[1], 0, -3);
+		if ($minstr < 10) { 
+		    $minstr = "00" . $minstr; 
+		}
+	        elsif ($minstr < 100) { 
+		    $minstr = "0" . $minstr; 
+		}
+		
 		my $hmsstr = substr($filename, -10, 6);
 		my $ymdstr = substr($filename, -19, 8);
-		my $pngpqins = "pqinsert -f EXP -p PredictedReflectivityV2_" . $split_arr[1] . "_" . $ymdstr . "-" . $hmsstr . ".png " . $file;
+		my $pngpqins = "pqinsert -f EXP -p nowcast_" . $ymdstr . "-" . $hmsstr . "-" . $minstr . ".png " . $file;
+	        #print $pngpqins;
 		system($pngpqins);
-		sleep 1;
+		#sleep 1;
 		unlink $file;
 	    }
-	    elsif ($suffix eq "xml") {
-		my $xmlpqins = "pqinsert -f EXP -p nowcastV2.xml " . $file;
-		print $xmlpqins;
-		system($xmlpqins);
-		sleep 1;
+	    elsif ($suffix eq "son") {
+		
+		my @split_arr = split /_/, $filename;
+		my $minstr = $split_arr[3];
+		if ($minstr < 10) {
+		    $minstr = "00" . $minstr;
+		}
+		elsif ($minstr < 100) {
+		    $minstr = "0" . $minstr;
+		}
+		my @split_arr_2 = split /-/, $split_arr[4];
+		my $ymdstr = $split_arr_2[0];
+		my $hmsstr = substr($split_arr_2[1], 0, 6);
+		#print "ymdstr: " . $ymdstr . " hmsstr: " . $hmsstr . " minstr: " . $minstr . "\n";
+		my $jsonpqins = "pqinsert -f EXP -p nowcast_" . $ymdstr . "-" . $hmsstr . "-" . $minstr . ".geojson "  . $file;
+		#print $jsonpqins;
+		system($jsonpqins);
+		#sleep 1;
 		unlink $file;
 	    }
 	}
