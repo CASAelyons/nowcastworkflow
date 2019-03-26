@@ -23,7 +23,7 @@ our $workflow_dir = $ENV{'CASA_WORKFLOW_DIR'};
 
 &command_line_parse;
 
-#&daemonize;
+&daemonize;
 
 my $file_mon = new threads \&file_monitor;
 
