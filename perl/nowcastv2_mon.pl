@@ -19,7 +19,7 @@ use threads;
 use threads::shared;
 
 our $input_data_dir;
-our $workflow_dir = $ENV{'CASA_WORKFLOW_DIR'};
+our $workflow_dir = $ENV{'NOWCAST_WORKFLOW_DIR'};
 
 &command_line_parse;
 

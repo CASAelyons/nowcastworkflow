@@ -16,8 +16,8 @@ class CASAWorkflow(object):
     def generate_dax(self):
         "Generate a workflow"
         ts = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
-        dax = ADAG("casa_wf-%s" % ts)
-        dax.metadata("name", "CASA")
+        dax = ADAG("casa_nowcast-wf-%s" % ts)
+        dax.metadata("name", "CASA Nowcast")
 
         #extract time
         string_end = self.forecast_fn[-1].find(".")
