@@ -49,6 +49,7 @@ class CASAWorkflow(object):
             mrt_job.uses(mrtconfigfile, link=Link.INPUT)
             mrt_job.uses(pr_file, link=Link.INPUT)
             mrt_job.uses(pr_geojson, link=Link.OUTPUT, transfer=True, register=False)
+            mrt_job.profile("pegasus", "label", "label_"+str(x))
             dax.addJob(mrt_job)
         
         # generate image from max reflectivity
@@ -61,6 +62,7 @@ class CASAWorkflow(object):
             pr_image_job.uses(pr_file, link=Link.INPUT)
             pr_image_job.uses(colorscale, link=Link.INPUT)
             pr_image_job.uses(pr_image, link=Link.OUTPUT, transfer=True, register=False)
+            pr_image_job.profile("pegasus", "label", "label_"+str(x))
             dax.addJob(pr_image_job)
 
         # Write the DAX file
