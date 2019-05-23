@@ -24,7 +24,7 @@ tr mrtV2 {
 		arch "x86_64"
 		os "LINUX"
 		type "INSTALLED"
-	profile pegasus "clusters.num" "1"
+	profile pegasus "clusters.num" "8"
       #profile pegasus "label" "casa_job"
 	}
 }
