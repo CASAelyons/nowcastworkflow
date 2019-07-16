@@ -1,0 +1,19 @@
+# This tells Pegasus where to find the Site Catalog
+pegasus.catalog.site.file=sites_nfs.xml
+
+# This tells Pegasus where to find the Replica Catalog
+pegasus.catalog.replica=File
+pegasus.catalog.replica.file=rc.txt
+
+# This tells Pegasus where to find the Transformation Catalog
+pegasus.catalog.transformation=Text
+pegasus.catalog.transformation.file=tc_nfs.txt
+
+# This is the name of the application for analytics
+pegasus.metrics.app=CASA-DEMO
+
+pegasus.transfer.worker.package.strict = false
+
+pegasus.transfer.links=true
+
+pegasus.integrity.checking=none
