@@ -38,19 +38,19 @@ class CASAWorkflow(object):
         dax.addJob(nowcast_split_job)
         
         #run merged reflectivity threshold
-        mrtconfigfile = File("mrtV2_config.txt")
+        d3configfile = File("options.cfg")
         for x in range(31):
             pr_fn = "PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc"
             pr_file = File(pr_fn)
             pr_geojson = File("mrt_STORM_CASA_" + str(x) + "_" + file_ymd + "-" + file_hms + ".geojson")
-            mrt_job = Job("mrtV2")
-            mrt_job.addArguments("-c", mrtconfigfile)
-            mrt_job.addArguments(pr_fn)
-            mrt_job.uses(mrtconfigfile, link=Link.INPUT)
-            mrt_job.uses(pr_file, link=Link.INPUT)
-            mrt_job.uses(pr_geojson, link=Link.OUTPUT, transfer=True, register=False)
-            mrt_job.profile("pegasus", "label", "label_"+str(x))
-            dax.addJob(mrt_job)
+            d3_job = Job("d3_cpp")
+            d3_job.addArguments("-c", d3configfile)
+            d3_job.addArguments(pr_fn)
+            d3_job.uses(d3configfile, link=Link.INPUT)
+            d3_job.uses(pr_file, link=Link.INPUT)
+            d3_job.uses(pr_geojson, link=Link.OUTPUT, transfer=True, register=False)
+            d3_job.profile("pegasus", "label", "label_"+str(x))
+            dax.addJob(d3_job)
         
         # generate image from max reflectivity
         colorscale = File("nexrad_ref.png")
