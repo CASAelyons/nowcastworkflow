@@ -12,6 +12,7 @@
       <directory type="shared-storage" path="${PWD}/output">
          <file-server operation="all" url="file://${PWD}/output"/>
       </directory>
+      <profile namespace="env" key="PATH">/home/ldm/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ldm/.local/bin:/home/ldm/bin</profile>
    </site>
 
    <site handle="condorpool" arch="x86_64" os="LINUX">
@@ -19,6 +20,7 @@
       <profile namespace="pegasus" key="style">condor</profile>
       <profile namespace="pegasus" key="data.configuration">condorio</profile>
       <profile namespace="condor" key="universe">vanilla</profile>
+      <profile namespace="env" key="PATH">/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin</profile>
    </site>
 </sitecatalog>
 
