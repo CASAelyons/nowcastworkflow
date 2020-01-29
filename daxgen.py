@@ -65,6 +65,19 @@ class CASAWorkflow(object):
             pr_image_job.profile("pegasus", "label", "label_"+str(x))
             dax.addJob(pr_image_job)
 
+            
+        routeconfigfile = File("route_plan.cfg")
+        in_geojsonfile = File("mrt_STORM_CASA_0_" + file_ymd + "-" + file_hms + ".geojson")
+        out_routefile = File("paths.geojson")
+        routing_job = Job("route_plan")
+        routing_job.addArguments("-c", routeconfigfile)
+        routing_job.addArguments("-i", in_geojsonfile)
+        routing_job.uses(routeconfigfile, link=Link.INPUT)
+        routing_job.uses(in_geojsonfile, link=Link.INPUT)
+        routing_job.uses(out_routefile, link=Link.OUTPUT, transfer=True, register=False)
+        routing_job.profile("pegasus", "label", "routelabel_0")
+        dax.addJob(routing_job)
+
         # Write the DAX file
         daxfile = os.path.join(self.outdir, dax.name+".dax")
         dax.writeXMLFile(daxfile)
