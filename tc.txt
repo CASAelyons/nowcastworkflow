@@ -1,12 +1,13 @@
-cont casa_image {
-     type "singularity"
-     image_site "condorpool"
-     image "file://${PWD}/bin/nowcast_singularity.img"
+cont nowcast_container {
+    type "singularity" 
+    image_site "condorpool"
+    image "file:///nfs/shared/ldm/nowcast_singularity.img"
+    mount "/nfs/shared:/nfs/shared"
 }
 
 tr NowcastToWDSS2 {
    site condorpool {
-      container "casa_image"
+      container "nowcast_container"
       pfn "/opt/NowcastToWDSS2/NowcastToWDSS2"
       arch "x86_64"
 		os "LINUX"
@@ -17,7 +18,7 @@ tr NowcastToWDSS2 {
 		
 tr d3_mrt {
    site condorpool {
-      container "casa_image"
+      container "nowcast_container"
 		pfn "/opt/d3_mrt/d3_mrt"
 		arch "x86_64"
 		os "LINUX"
@@ -29,7 +30,7 @@ tr d3_mrt {
 
 tr merged_netcdf2png {	
    site condorpool {
-      container "casa_image"
+      container "nowcast_container"
       pfn "/opt/netcdf2png/merged_netcdf2png"	
 		arch "x86_64"
 		os "LINUX"

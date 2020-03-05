@@ -16,11 +16,14 @@
    </site>
 
    <site handle="condorpool" arch="x86_64" os="LINUX">
-      <!-- These profiles tell Pegasus that the site is a plain Condor pool -->
-      <profile namespace="pegasus" key="style">condor</profile>
-      <profile namespace="pegasus" key="data.configuration">condorio</profile>
-      <profile namespace="condor" key="universe">vanilla</profile>
-      <profile namespace="env" key="PATH">/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin</profile>
+     <directory type="shared-scratch"  path="/nfs/shared/ldm/nowcast">
+       <file-server operation="all"   url="file:///nfs/shared/ldm/nowcast"/>
+     </directory>
+     <profile namespace="pegasus" key="style">condor</profile>
+     <profile namespace="pegasus" key="data.configuration">nonsharedfs</profile>
+     <!--profile namespace="pegasus" key="data.configuration">condorio</profile-->
+     <profile namespace="condor" key="universe">vanilla</profile>
    </site>
+     
 </sitecatalog>
 
