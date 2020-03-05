@@ -15,10 +15,10 @@ tr NowcastToWDSS2 {
 	}
 }
 		
-tr d3_cpp {
+tr d3_mrt {
    site condorpool {
       container "casa_image"
-		pfn "/opt/d3_cpp/d3_cpp"
+		pfn "/opt/d3_mrt/d3_mrt"
 		arch "x86_64"
 		os "LINUX"
 		type "INSTALLED"

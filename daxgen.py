@@ -43,7 +43,7 @@ class CASAWorkflow(object):
             pr_fn = "PredictedReflectivity_"+ str(x) + "min_" + file_ymd + "-" + file_hms + ".nc"
             pr_file = File(pr_fn)
             pr_geojson = File("mrt_STORM_CASA_" + str(x) + "_" + file_ymd + "-" + file_hms + ".geojson")
-            d3_job = Job("d3_cpp")
+            d3_job = Job("d3_mrt")
             d3_job.addArguments("-c", d3configfile)
             d3_job.addArguments(pr_fn)
             d3_job.uses(d3configfile, link=Link.INPUT)
@@ -64,19 +64,6 @@ class CASAWorkflow(object):
             pr_image_job.uses(pr_image, link=Link.OUTPUT, transfer=True, register=False)
             pr_image_job.profile("pegasus", "label", "label_"+str(x))
             dax.addJob(pr_image_job)
-
-            
-        routeconfigfile = File("route_plan.cfg")
-        in_geojsonfile = File("mrt_STORM_CASA_0_" + file_ymd + "-" + file_hms + ".geojson")
-        out_routefile = File("paths.geojson")
-        routing_job = Job("route_plan")
-        routing_job.addArguments("-c", routeconfigfile)
-        routing_job.addArguments("-i", in_geojsonfile)
-        routing_job.uses(routeconfigfile, link=Link.INPUT)
-        routing_job.uses(in_geojsonfile, link=Link.INPUT)
-        routing_job.uses(out_routefile, link=Link.OUTPUT, transfer=True, register=False)
-        routing_job.profile("pegasus", "label", "routelabel_0")
-        dax.addJob(routing_job)
 
         # Write the DAX file
         daxfile = os.path.join(self.outdir, dax.name+".dax")
