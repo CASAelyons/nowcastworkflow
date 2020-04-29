@@ -1,8 +1,9 @@
 cont nowcast_container {
     type "singularity" 
     image_site "condorpool"
-    image "file:///nfs/shared/ldm/nowcast_singularity.img"
+    image "file:///nfs/shared/ldm/containers/nowcastcontainer.simg"
     mount "/nfs/shared:/nfs/shared"
+    #profile env "SEQEXEC_CPUS" "4"
 }
 
 tr NowcastToWDSS2 {
@@ -23,7 +24,9 @@ tr d3_mrt {
 		arch "x86_64"
 		os "LINUX"
 		type "INSTALLED"
-	profile pegasus "clusters.num" "8"
+      profile pegasus "clusters.size" "4"
+      #profile pegasus "cores" "4"
+      #profile pegasus "clusters.num" "8"
       #profile pegasus "label" "casa_job"
 	}
 }

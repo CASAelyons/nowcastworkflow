@@ -21,6 +21,7 @@
      </directory>
      <profile namespace="pegasus" key="style">condor</profile>
      <profile namespace="pegasus" key="data.configuration">nonsharedfs</profile>
+     <profile namespace="pegasus" key="auxillary.local">true</profile>
      <!--profile namespace="pegasus" key="data.configuration">condorio</profile-->
      <profile namespace="condor" key="universe">vanilla</profile>
    </site>

@@ -23,5 +23,5 @@ pegasus-plan --conf pegasus.properties \
     --output-site local \
     --cleanup leaf \
     --cluster horizontal \
-    --force \
+    --force  \
     --submit
